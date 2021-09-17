@@ -25,7 +25,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
   "HomeController" should {
 
     "return population for city name" in {
-      val request = PopulationRequest("München", None)
+      val request = PopulationRequest("München", None, None)
       val result = controller.index().apply(FakeRequest(GET, "/").withJsonBody(Json.toJson(request)))
       val response = contentAsJson(result).as[PopulationResponse]
       status(result) mustBe OK
@@ -33,7 +33,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
     }
 
     "return population for city name and year" in {
-      val request = PopulationRequest("München", Some(1999))
+      val request = PopulationRequest("München", Some(1999), None)
       val result = controller.index().apply(FakeRequest(GET, "/").withJsonBody(Json.toJson(request)))
       val response = contentAsJson(result).as[PopulationResponse]
       status(result) mustBe OK
@@ -41,9 +41,18 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
     }
 
     "return NotFound with no city given" in {
-      val request = PopulationRequest("", None)
+      val request = PopulationRequest("", None, None)
       val result = controller.index().apply(FakeRequest(GET, "/").withJsonBody(Json.toJson(request)))
-      status(result) mustBe NotFound
+      status(result) mustBe 404
+    }
+
+    "return population for city name and year and provisional flag" in {
+      val request = PopulationRequest("Cairns", Some(2011), Some(true))
+      val result = controller.index().apply(FakeRequest(GET, "/").withJsonBody(Json.toJson(request)))
+      val response = contentAsJson(result).as[PopulationResponse]
+      status(result) mustBe OK
+      response.population mustBe 139693
+
     }
   }
 }

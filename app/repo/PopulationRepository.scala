@@ -9,7 +9,7 @@ import utils.NoDataFoundException
 import scala.util.{Failure, Success, Try}
 
 trait PopulationRepository {
-  def getPopulation(cityName: String, year: Option[Short] = None): Try[Int]
+  def getPopulation(cityName: String, year: Option[Short], includeProvisional:Option[Boolean]): Try[Int]
 }
 
 case class CsvPopulationRepository(populations: Source) extends PopulationRepository{
@@ -39,12 +39,20 @@ case class CsvPopulationRepository(populations: Source) extends PopulationReposi
         (city, cityData.groupBy(_.year))
       }
   }
-  override def getPopulation(cityName: String, year: Option[Short] = None): Try[Int] = {
+  override def getPopulation(cityName: String, year: Option[Short], includeProvisional:Option[Boolean]): Try[Int] = {
     cityNamePopulationDataMap.get(cityName)
       .flatMap{ cityData =>
+        val filteredData = cityData.flatMap{case(year, yearData) =>
+          val filteredYearData =
+            yearData.filter( data =>
+              includeProvisional
+                .forall(flag => flag && data.reliability.contains("Provisional"))
+            )
+          if(filteredYearData.nonEmpty) Some(year, filteredYearData) else None
+        }
         val maybeData = year
-          .map(cityData.get)
-          .getOrElse(cityData.get(cityData.keys.max))
+          .map(filteredData.get)
+          .getOrElse(filteredData.get(cityData.keys.max))
         maybeData
           .map(_.map(_.value).sum.toInt)
       }.map(Success(_))

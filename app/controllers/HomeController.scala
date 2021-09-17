@@ -27,7 +27,7 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents,
    */
   def index():Action[AnyContent] = withBodyAs[PopulationRequest] {
     request => {
-      val response = populationRepository.getPopulation(request.cityName, request.year)
+      val response = populationRepository.getPopulation(request.cityName, request.year, request.includeProvisional)
         .map(PopulationResponse(_))
       sendOkIfSuccess(response)
     }
