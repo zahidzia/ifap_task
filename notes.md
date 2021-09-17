@@ -1,0 +1,1 @@
+The CSV has a footer at the end which in not in a proper format
