@@ -46,7 +46,7 @@ case class CsvPopulationRepository(populations: Source) extends PopulationReposi
           val filteredYearData =
             yearData.filter( data =>
               includeProvisional
-                .forall(flag => flag && data.reliability.contains("Provisional"))
+                .forall(flag => flag == data.reliability.contains("Provisional"))
             )
           if(filteredYearData.nonEmpty) Some(year, filteredYearData) else None
         }

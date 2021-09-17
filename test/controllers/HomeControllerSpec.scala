@@ -52,7 +52,13 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
       val response = contentAsJson(result).as[PopulationResponse]
       status(result) mustBe OK
       response.population mustBe 139693
-
+    }
+    "return population for city name and year and provisional flag false" in {
+      val request = PopulationRequest("Cairns", Some(2011), Some(false))
+      val result = controller.index().apply(FakeRequest(GET, "/").withJsonBody(Json.toJson(request)))
+      val response = contentAsJson(result).as[PopulationResponse]
+      status(result) mustBe OK
+      response.population mustBe 133911
     }
   }
 }
